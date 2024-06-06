@@ -29,6 +29,7 @@ public class ProcessUtils {
                     compileOutputStringBuilder.append(compileOutputLine);
                 }
                 executeMessage.setMessage(compileOutputStringBuilder.toString());
+                System.out.println(compileOutputStringBuilder);
             } else {
                 System.out.println(opName + "失败" + exitValue);
                 //分批读取正常输出流：有的程序员会在正常输出里写一些错误日志之类的
@@ -49,12 +50,11 @@ public class ProcessUtils {
                     errorCompileOutputStringBuilder.append(errorcompileOutputLine);
                 }
                 executeMessage.setErrorMessage(errorCompileOutputStringBuilder.toString());
-
+                System.out.println(errorCompileOutputStringBuilder);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
         return executeMessage;
     }
 

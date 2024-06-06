@@ -41,6 +41,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
     @Override
     public ExecutecodeResponse executeCode(ExecutecodeCodeRequest excodeCodeRequest) {
         List<String> inputList = excodeCodeRequest.getInputList();
+        inputList = Arrays.asList("1 2","3 4");
         String code = excodeCodeRequest.getCode();
         String language = excodeCodeRequest.getLanguage();
         //1.把用户提交的代码保存到文件中
@@ -66,7 +67,17 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
             throw new RuntimeException(e);
         }
         //3.执行程序
-
+        for(String inputArgs:inputList){
+            String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+            try {
+                //执行命令
+                Process process = Runtime.getRuntime().exec(runCmd);
+                //获取控制台输出
+                ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(process, "执行");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return null;
     }
 }
