@@ -1,6 +1,7 @@
 package com.yupi.yojcodesandbox.utils;
 
 import com.yupi.yojcodesandbox.model.ExecuteMessage;
+import org.springframework.util.StopWatch;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,6 +16,8 @@ public class ProcessUtils {
         ExecuteMessage executeMessage = new ExecuteMessage();
 
         try {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
             int exitValue = runProcess.waitFor();
             executeMessage.setExitValue(exitValue);
             //正常退出，我现在想获取控制台输出
@@ -29,7 +32,6 @@ public class ProcessUtils {
                     compileOutputStringBuilder.append(compileOutputLine);
                 }
                 executeMessage.setMessage(compileOutputStringBuilder.toString());
-                System.out.println(compileOutputStringBuilder);
             } else {
                 System.out.println(opName + "失败" + exitValue);
                 //分批读取正常输出流：有的程序员会在正常输出里写一些错误日志之类的
@@ -50,7 +52,9 @@ public class ProcessUtils {
                     errorCompileOutputStringBuilder.append(errorcompileOutputLine);
                 }
                 executeMessage.setErrorMessage(errorCompileOutputStringBuilder.toString());
-                System.out.println(errorCompileOutputStringBuilder);
+                stopWatch.stop();
+                long lastTaskTimeMillis = stopWatch.getLastTaskTimeMillis();
+                executeMessage.setTime(lastTaskTimeMillis);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
