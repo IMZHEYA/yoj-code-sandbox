@@ -115,7 +115,11 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         judgeInfo.setTime(maxTime);
 //        judgeInfo.setMemory();
         executecodeResponse.setJudgeInfo(judgeInfo);
-
+        //5.文件清理
+        if(userCodeFile.getParentFile() != null){
+            boolean del = FileUtil.del(userCodeParentPath);
+            System.out.println("删除" + (del ? "成功" : "失败"));
+        }
         return executecodeResponse;
     }
 }
