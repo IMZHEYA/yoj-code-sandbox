@@ -9,10 +9,8 @@ import com.yupi.yojcodesandbox.model.ExecutecodeResponse;
 import com.yupi.yojcodesandbox.model.JudgeInfo;
 import com.yupi.yojcodesandbox.utils.ProcessUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +66,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
             ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(process, "编译");
             System.out.println(executeMessage);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return getErrorResponse(e);
         }
         //3.执行程序
         //输出信息列表
@@ -83,7 +81,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
                 System.out.println(executeMessage);
                 executeMessageList.add(executeMessage);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                return getErrorResponse(e);
             }
         }
         //4.整理输出
@@ -96,7 +94,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
             if(time != null){
                 maxTime = Math.max(time,maxTime);
             }
-            //有的执行用例执行时出现错误，响应信息直接设为错误信息，且响应状态设为错误,中断循环
+            //有的执行用例执行时出现错误，响应信息直接设为用户提交代码错误的信息，且响应状态设为错误,中断循环
             if(StrUtil.isNotBlank(executeMessage.getErrorMessage())){
                 executecodeResponse.setMessage(executeMessage.getErrorMessage());
                 executecodeResponse.setStatus(3);
@@ -120,6 +118,25 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
             boolean del = FileUtil.del(userCodeParentPath);
             System.out.println("删除" + (del ? "成功" : "失败"));
         }
+        //6.错误处理，提升程序健壮性
+
         return executecodeResponse;
     }
+
+    /**
+     * 返回异常信息对象
+     * @param e
+     * @return
+     */
+    private ExecutecodeResponse getErrorResponse(Throwable e){
+        ExecutecodeResponse executecodeResponse = new ExecutecodeResponse();
+        executecodeResponse.setOutputList(new ArrayList<>());
+        executecodeResponse.setMessage(e.getMessage());
+        //表示代码沙箱错误
+        executecodeResponse.setStatus(2);
+        executecodeResponse.setJudgeInfo(new JudgeInfo());
+
+        return executecodeResponse;
+    }
+
 }
