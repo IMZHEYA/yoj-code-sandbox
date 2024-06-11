@@ -29,7 +29,7 @@ public class ProcessUtils {
                 //逐行读取，控制台输出信息
                 String compileOutputLine;
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutputLine);
+                    compileOutputStringBuilder.append(compileOutputLine).append("\n");
                 }
                 executeMessage.setMessage(compileOutputStringBuilder.toString());
             } else {
@@ -40,7 +40,7 @@ public class ProcessUtils {
                 //逐行读取，控制台输出信息
                 String compileOutputLine;
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutputLine);
+                    compileOutputStringBuilder.append(compileOutputLine).append("\n");
                 }
                 System.out.println(compileOutputStringBuilder);
                 //分批读取错误输出：
@@ -49,7 +49,7 @@ public class ProcessUtils {
                 //逐行读取，控制台输出信息
                 String errorcompileOutputLine;
                 while ((errorcompileOutputLine = errorbufferedReader.readLine()) != null) {
-                    errorCompileOutputStringBuilder.append(errorcompileOutputLine);
+                    errorCompileOutputStringBuilder.append(errorcompileOutputLine).append("\n");
                 }
                 executeMessage.setErrorMessage(errorCompileOutputStringBuilder.toString());
                 stopWatch.stop();
