@@ -31,7 +31,8 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         JavaNativeCodeSandbox javaNativeCodeSandbox = new JavaNativeCodeSandbox();
         executecodeCodeRequest.setInputList(Arrays.asList("1 2", "3 4"));
         //ResourceUtil可以读取resources目录下的文件
-        String code = ResourceUtil.readStr("Main.java", StandardCharsets.UTF_8);
+//        String code = ResourceUtil.readStr("Main.java", StandardCharsets.UTF_8);
+        String code = ResourceUtil.readStr("testCode/SleepError.java", StandardCharsets.UTF_8);
         executecodeCodeRequest.setCode(code);
         executecodeCodeRequest.setLanguage("java");
         ExecutecodeResponse executecodeResponse = javaNativeCodeSandbox.executeCode(executecodeCodeRequest);
