@@ -32,11 +32,11 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         executecodeCodeRequest.setInputList(Arrays.asList("1 2", "3 4"));
         //ResourceUtil可以读取resources目录下的文件
 //        String code = ResourceUtil.readStr("Main.java", StandardCharsets.UTF_8);
-//        String code = ResourceUtil.readStr("testCode/SleepError.java", StandardCharsets.UTF_8);
+        String code = ResourceUtil.readStr("testCode/SleepError.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/MemoryError.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/ReadFileError.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/WriteFileError.java", StandardCharsets.UTF_8);
-        String code = ResourceUtil.readStr("testCode/RunFileError.java", StandardCharsets.UTF_8);
+//        String code = ResourceUtil.readStr("testCode/RunFileError.java", StandardCharsets.UTF_8);
         executecodeCodeRequest.setCode(code);
         executecodeCodeRequest.setLanguage("java");
         ExecutecodeResponse executecodeResponse = javaNativeCodeSandbox.executeCode(executecodeCodeRequest);
@@ -81,6 +81,15 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
             try {
                 //执行命令
                 Process process = Runtime.getRuntime().exec(runCmd);
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(500l);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println("超时了，中断");
+                    process.destroy();
+                }).start();
                 //获取控制台输出
                 ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(process, "执行");
                 System.out.println(executeMessage);
