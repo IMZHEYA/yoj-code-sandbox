@@ -3,6 +3,8 @@ package com.yupi.yojcodesandbox;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.dfa.FoundWord;
+import cn.hutool.dfa.WordTree;
 import com.yupi.yojcodesandbox.model.ExecuteMessage;
 import com.yupi.yojcodesandbox.model.ExecutecodeCodeRequest;
 import com.yupi.yojcodesandbox.model.ExecutecodeResponse;
@@ -26,6 +28,17 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
 
     private static final String CLOBAL_JAVA_CLASS_NAME = "Main.java";
 
+
+    //黑名单列表
+    public static final List<String> blackList = Arrays.asList("Files","exec");
+    //字典树
+    public static final WordTree WORD_TREE;
+    //初始化字典树
+    static {
+        WORD_TREE = new WordTree();
+        WORD_TREE.addWords(blackList);
+    }
+
     public static void main(String[] args) {
         ExecutecodeCodeRequest executecodeCodeRequest = new ExecutecodeCodeRequest();
         JavaNativeCodeSandbox javaNativeCodeSandbox = new JavaNativeCodeSandbox();
@@ -33,12 +46,17 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         //ResourceUtil可以读取resources目录下的文件
 //        String code = ResourceUtil.readStr("Main.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/SleepError.java", StandardCharsets.UTF_8);
-        String code = ResourceUtil.readStr("testCode/MemoryError.java", StandardCharsets.UTF_8);
-//        String code = ResourceUtil.readStr("testCode/ReadFileError.java", StandardCharsets.UTF_8);
+//        String code = ResourceUtil.readStr("testCode/MemoryError.java", StandardCharsets.UTF_8);
+        String code = ResourceUtil.readStr("testCode/ReadFileError.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/WriteFileError.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/RunFileError.java", StandardCharsets.UTF_8);
         executecodeCodeRequest.setCode(code);
         executecodeCodeRequest.setLanguage("java");
+        FoundWord foundWord = WORD_TREE.matchWord(code);
+        if(foundWord != null){
+            System.out.println("包含禁止词" + foundWord.getFoundWord());
+            return;
+        }
         ExecutecodeResponse executecodeResponse = javaNativeCodeSandbox.executeCode(executecodeCodeRequest);
         System.out.println(executecodeResponse);
 
