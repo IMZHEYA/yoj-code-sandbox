@@ -32,8 +32,8 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         executecodeCodeRequest.setInputList(Arrays.asList("1 2", "3 4"));
         //ResourceUtil可以读取resources目录下的文件
 //        String code = ResourceUtil.readStr("Main.java", StandardCharsets.UTF_8);
-        String code = ResourceUtil.readStr("testCode/SleepError.java", StandardCharsets.UTF_8);
-//        String code = ResourceUtil.readStr("testCode/MemoryError.java", StandardCharsets.UTF_8);
+//        String code = ResourceUtil.readStr("testCode/SleepError.java", StandardCharsets.UTF_8);
+        String code = ResourceUtil.readStr("testCode/MemoryError.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/ReadFileError.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/WriteFileError.java", StandardCharsets.UTF_8);
 //        String code = ResourceUtil.readStr("testCode/RunFileError.java", StandardCharsets.UTF_8);
@@ -77,7 +77,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         //输出信息列表
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
         for(String inputArgs:inputList){
-            String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
             try {
                 //执行命令
                 Process process = Runtime.getRuntime().exec(runCmd);
