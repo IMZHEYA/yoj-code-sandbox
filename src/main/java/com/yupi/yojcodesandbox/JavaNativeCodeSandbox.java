@@ -28,6 +28,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
 
     private static final String CLOBAL_JAVA_CLASS_NAME = "Main.java";
 
+    public static final String SECURITY_MANAGER_CLASS_NAME = "D:\\project\\yoj-code-sandbox\\src\\main\\resources\\sercurity\\MySecurityManager.class";
 
     //黑名单列表
     public static final List<String> blackList = Arrays.asList("Files","exec");
@@ -52,11 +53,6 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
 //        String code = ResourceUtil.readStr("testCode/RunFileError.java", StandardCharsets.UTF_8);
         executecodeCodeRequest.setCode(code);
         executecodeCodeRequest.setLanguage("java");
-        FoundWord foundWord = WORD_TREE.matchWord(code);
-        if(foundWord != null){
-            System.out.println("包含禁止词" + foundWord.getFoundWord());
-            return;
-        }
         ExecutecodeResponse executecodeResponse = javaNativeCodeSandbox.executeCode(executecodeCodeRequest);
         System.out.println(executecodeResponse);
 
@@ -68,6 +64,11 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         inputList = Arrays.asList("1 2","3 4");
         String code = excodeCodeRequest.getCode();
         String language = excodeCodeRequest.getLanguage();
+        FoundWord foundWord = WORD_TREE.matchWord(code);
+        if(foundWord != null){
+            System.out.println("包含禁止词" + foundWord.getFoundWord());
+            return null;
+        }
         //1.把用户提交的代码保存到文件中
         //获取当前用户工作目录 D:\project\yoj-code-sandbox
         String userDir = System.getProperty("user.dir");
@@ -95,7 +96,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         //输出信息列表
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
         for(String inputArgs:inputList){
-            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=MySecurityManager Main %s", userCodeParentPath, SECURITY_MANAGER_CLASS_NAME, inputArgs);
             try {
                 //执行命令
                 Process process = Runtime.getRuntime().exec(runCmd);
