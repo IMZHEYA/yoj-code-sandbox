@@ -48,7 +48,15 @@ public class DockerDemo {
                 super.onNext(item);
             }
         };
+        //阻塞等待日志输出
+        dockerClient.logContainerCmd(containId)
+                .withStdErr(true)   //包含标准错误输出
+                .withStdOut(true)   //包含标准输出
+                .exec(logContainerResultCallback)
+                .awaitCompletion();
 
+        //6 强制删除容器
+//        dockerClient.removeContainerCmd(containId).withForce(true).exec();
     }
 
 }
