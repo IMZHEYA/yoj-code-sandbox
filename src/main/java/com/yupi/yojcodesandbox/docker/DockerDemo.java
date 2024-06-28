@@ -57,6 +57,9 @@ public class DockerDemo {
 
         //6 强制删除容器
 //        dockerClient.removeContainerCmd(containId).withForce(true).exec();
+
+        //7 强制删除镜像
+//        dockerClient.removeImageCmd(image).withForce(true).exec();
     }
 
 }
