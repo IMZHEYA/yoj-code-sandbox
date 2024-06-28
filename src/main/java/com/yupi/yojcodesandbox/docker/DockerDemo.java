@@ -1,12 +1,12 @@
 package com.yupi.yojcodesandbox.docker;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.PullImageCmd;
-import com.github.dockerjava.api.command.PullImageResultCallback;
+import com.github.dockerjava.api.command.*;
+import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.core.DockerClientBuilder;
+
+import java.util.List;
 
 public class DockerDemo {
     public static void main(String[] args) throws InterruptedException {
@@ -29,7 +29,12 @@ public class DockerDemo {
                 .exec();
         String containId = createContainerResponse.getId();
         System.out.println(createContainerResponse);
-
+        //3 查看容器状态
+        ListContainersCmd listContainersCmd = dockerClient.listContainersCmd();
+        List<Container> containerList = listContainersCmd.withShowAll(true).exec();
+        for(Container container : containerList){
+            System.out.println(container);
+        }
     }
 
 }
