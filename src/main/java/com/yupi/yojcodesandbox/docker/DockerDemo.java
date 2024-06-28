@@ -35,6 +35,9 @@ public class DockerDemo {
         for(Container container : containerList){
             System.out.println(container);
         }
+        //4 启动容器
+        dockerClient.startContainerCmd(containId).exec();
+
     }
 
 }
