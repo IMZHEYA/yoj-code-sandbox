@@ -13,6 +13,7 @@ import com.yupi.yojcodesandbox.model.ExecutecodeCodeRequest;
 import com.yupi.yojcodesandbox.model.ExecutecodeResponse;
 import com.yupi.yojcodesandbox.model.JudgeInfo;
 import com.yupi.yojcodesandbox.utils.ProcessUtils;
+import org.springframework.util.StopWatch;
 
 import java.io.File;
 import java.io.IOException;
@@ -123,6 +124,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
         dockerClient.startContainerCmd(containId).exec();
         //docker命令：docker exec blissful_archimedes(容器名) java -cp /app Main 1 3
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
+        StopWatch stopWatch = new StopWatch();
         for(String inputArgs : inputList){
             //1 3
             String[] inputArgsArray = inputArgs.split(" ");
@@ -138,6 +140,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             ExecuteMessage executeMessage = new ExecuteMessage();
             final String[] message = {null};
             final String[] errorMessage = {null};
+            long time = 0L;
             ExecStartResultCallback execStartResultCallback = new ExecStartResultCallback() {
 
                 @Override
@@ -156,13 +159,17 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             };
 
             try {
+                stopWatch.start();
                 dockerClient.execStartCmd(execId).exec(execStartResultCallback).awaitCompletion();
+                stopWatch.stop();
+                time = stopWatch.getLastTaskTimeMillis();
             } catch (InterruptedException e) {
                 System.out.println("程序执行异常");
                 throw new RuntimeException(e);
             }
             executeMessage.setMessage(message[0]);
             executeMessage.setErrorMessage(errorMessage[0]);
+            executeMessage.setTime(time);
             executeMessageList.add(executeMessage);
         }
 
