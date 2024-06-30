@@ -8,5 +8,5 @@ public interface CodeSandbox {
      * @param excodeCodeRequest
      * @return
      */
-    ExecutecodeResponse executeCode(ExecutecodeCodeRequest excodeCodeRequest);
+    ExecutecodeResponse executeCode(ExecutecodeCodeRequest excodeCodeRequest) throws InterruptedException;
 }

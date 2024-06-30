@@ -64,6 +64,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         inputList = Arrays.asList("1 2","3 4");
         String code = excodeCodeRequest.getCode();
         String language = excodeCodeRequest.getLanguage();
+        //检验代码中是否包含黑名单的命令
         FoundWord foundWord = WORD_TREE.matchWord(code);
         if(foundWord != null){
             System.out.println("包含禁止词" + foundWord.getFoundWord());
