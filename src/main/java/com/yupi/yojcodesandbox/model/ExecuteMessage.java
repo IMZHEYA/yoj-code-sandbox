@@ -17,4 +17,7 @@ public class ExecuteMessage {
     //程序消耗时间
     private Long time;
 
+    //程序消耗内存
+    private Long memory;
+
 }

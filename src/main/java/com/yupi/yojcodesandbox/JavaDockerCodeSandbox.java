@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DockerClientBuilder;
@@ -15,6 +16,7 @@ import com.yupi.yojcodesandbox.model.JudgeInfo;
 import com.yupi.yojcodesandbox.utils.ProcessUtils;
 import org.springframework.util.StopWatch;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -118,10 +120,10 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
                 .withAttachStdout(true)  //获取容器输出
                 .withTty(true) //创建交互式终端
                 .exec();
-        String containId = createContainerResponse.getId();
+        String containerId = createContainerResponse.getId();
         System.out.println(createContainerResponse);
         // 4. 启动容器，执行代码
-        dockerClient.startContainerCmd(containId).exec();
+        dockerClient.startContainerCmd(containerId).exec();
         //docker命令：docker exec blissful_archimedes(容器名) java -cp /app Main 1 3
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
         StopWatch stopWatch = new StopWatch();
@@ -129,7 +131,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             //1 3
             String[] inputArgsArray = inputArgs.split(" ");
             String[] cmdArray = ArrayUtil.append(new String[] {"java","-cp","/app","Main"},inputArgsArray);
-            ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(containId)
+            ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(containerId)
                     .withCmd(cmdArray)
                     .withAttachStderr(true)
                     .withAttachStdin(true)
@@ -157,12 +159,43 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
                     super.onNext(frame);
                 }
             };
+            //获取程序占用内存
+            final long[] maxMemory = {0L};
+            StatsCmd statsCmd = dockerClient.statsCmd(containerId);
+            ResultCallback<Statistics> statisticsResultCallback = new ResultCallback<Statistics>() {
+                @Override
+                public void onStart(Closeable closeable) {
 
+                }
+
+                @Override
+                public void onNext(Statistics statistics) {
+                    System.out.println("内存占用：" + statistics.getMemoryStats().getUsage());
+                    maxMemory[0] = Math.max(statistics.getMemoryStats().getUsage(), maxMemory[0]);
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+
+                }
+
+                @Override
+                public void onComplete() {
+
+                }
+
+                @Override
+                public void close() throws IOException {
+
+                }
+            };
+            statsCmd.exec(statisticsResultCallback);
             try {
                 stopWatch.start();
                 dockerClient.execStartCmd(execId).exec(execStartResultCallback).awaitCompletion();
                 stopWatch.stop();
                 time = stopWatch.getLastTaskTimeMillis();
+                statsCmd.close();
             } catch (InterruptedException e) {
                 System.out.println("程序执行异常");
                 throw new RuntimeException(e);
@@ -170,6 +203,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             executeMessage.setMessage(message[0]);
             executeMessage.setErrorMessage(errorMessage[0]);
             executeMessage.setTime(time);
+            executeMessage.setMemory(maxMemory[0]);
             executeMessageList.add(executeMessage);
         }
 
