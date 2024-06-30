@@ -2,16 +2,12 @@ package com.yupi.yojcodesandbox;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.core.util.ArrayUtil;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.PullImageCmd;
-import com.github.dockerjava.api.command.PullImageResultCallback;
-import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.PullResponseItem;
-import com.github.dockerjava.api.model.Volume;
+import com.github.dockerjava.api.command.*;
+import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.command.ExecStartResultCallback;
 import com.yupi.yojcodesandbox.model.ExecuteMessage;
 import com.yupi.yojcodesandbox.model.ExecutecodeCodeRequest;
 import com.yupi.yojcodesandbox.model.ExecutecodeResponse;
@@ -88,7 +84,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             return getErrorResponse(e);
         }
         //3.创建容器，把编译后的文件上传到容器中
-        // 1 下载镜像 (第一次执行拉取镜像)
+        // 下载镜像 (第一次执行拉取镜像)
         DockerClient dockerClient = DockerClientBuilder.getInstance().build();
         String image = "openjdk:8-alpine";
         if(FIRST_INIT){
@@ -107,7 +103,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
                 throw new RuntimeException(e);
             }
         }
-        //2 创建容器，直接创建一个有编译文件的容器
+        //创建容器，直接创建一个有编译文件的容器
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(image);
         //withCmd 当创建的这个容器启动时，里面的命令就会执行
         HostConfig hostConfig = new HostConfig();
@@ -123,8 +119,52 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
                 .exec();
         String containId = createContainerResponse.getId();
         System.out.println(createContainerResponse);
-        //3 启动容器
+        // 4. 启动容器，执行代码
         dockerClient.startContainerCmd(containId).exec();
+        //docker命令：docker exec blissful_archimedes(容器名) java -cp /app Main 1 3
+        List<ExecuteMessage> executeMessageList = new ArrayList<>();
+        for(String inputArgs : inputList){
+            //1 3
+            String[] inputArgsArray = inputArgs.split(" ");
+            String[] cmdArray = ArrayUtil.append(new String[] {"java","-cp","/app","Main"},inputArgsArray);
+            ExecCreateCmdResponse execCreateCmdResponse = dockerClient.execCreateCmd(containId)
+                    .withCmd(cmdArray)
+                    .withAttachStderr(true)
+                    .withAttachStdin(true)
+                    .withAttachStdout(true)
+                    .exec();
+            System.out.println("创建执行命令： "+ execCreateCmdResponse);
+            String execId = execCreateCmdResponse.getId();
+            ExecuteMessage executeMessage = new ExecuteMessage();
+            final String[] message = {null};
+            final String[] errorMessage = {null};
+            ExecStartResultCallback execStartResultCallback = new ExecStartResultCallback() {
+
+                @Override
+                public void onNext(Frame frame) {
+                    StreamType streamType = frame.getStreamType();
+                    if(StreamType.STDERR.equals(streamType)){
+                        errorMessage[0] =  new String (frame.getPayload());
+                        System.out.println("输出错误结果:" + errorMessage[0]);
+                    }
+                    else {
+                        message[0] = new String(frame.getPayload());
+                        System.out.println("输出结果:"+ message[0]);
+                    }
+                    super.onNext(frame);
+                }
+            };
+
+            try {
+                dockerClient.execStartCmd(execId).exec(execStartResultCallback).awaitCompletion();
+            } catch (InterruptedException e) {
+                System.out.println("程序执行异常");
+                throw new RuntimeException(e);
+            }
+            executeMessage.setMessage(message[0]);
+            executeMessage.setErrorMessage(errorMessage[0]);
+            executeMessageList.add(executeMessage);
+        }
 
         ExecutecodeResponse executecodeResponse = new ExecutecodeResponse();
         return executecodeResponse;
