@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Docker实现代码沙箱
@@ -112,14 +113,20 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
         //withCmd 当创建的这个容器启动时，里面的命令就会执行
         HostConfig hostConfig = new HostConfig();
         hostConfig.withMemory(100 * 1000 * 1000L); // 限制容器的内存
+        hostConfig.withMemorySwap(0L);
         hostConfig.withCpuCount(1L); //限制容器只能使用cpu的核数
         hostConfig.setBinds(new Bind(userCodeParentPath,new Volume("/app"))); //创建容器时可以指定容器映射，作用是把本地的文件同步到容器中，可以让容器访问
+        //todo 安全管理措施
+        String profileConfig = ResourceUtil.readUtf8Str("profile.json");
+        hostConfig.withSecurityOpts(Arrays.asList("seccomp=" + profileConfig));
         CreateContainerResponse createContainerResponse = containerCmd
                 .withHostConfig(hostConfig)
                 .withAttachStderr(true)   //获取容器输出
                 .withAttachStdin(true)   //获取容器输出
                 .withAttachStdout(true)  //获取容器输出
                 .withTty(true) //创建交互式终端
+                .withNetworkDisabled(true)
+                .withReadonlyRootfs(true)
                 .exec();
         String containerId = createContainerResponse.getId();
         System.out.println(createContainerResponse);
@@ -144,7 +151,14 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             final String[] message = {null};
             final String[] errorMessage = {null};
             long time = 0L;
+            final boolean[] timeout = {true}; // 是否超时，默认超时
             ExecStartResultCallback execStartResultCallback = new ExecStartResultCallback() {
+                //当程序执行完成之后，他会执行这个方法
+                @Override
+                public void onComplete() {
+                    timeout[0] = false;//如果五秒内可以执行完成的话，就会执行这个方法，设置为不超时
+                    super.onComplete();
+                }
 
                 @Override
                 public void onNext(Frame frame) {
@@ -193,7 +207,9 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             statsCmd.exec(statisticsResultCallback);
             try {
                 stopWatch.start();
-                dockerClient.execStartCmd(execId).exec(execStartResultCallback).awaitCompletion();
+                dockerClient.execStartCmd(execId)
+                        .exec(execStartResultCallback)
+                        .awaitCompletion(5000, TimeUnit.MILLISECONDS);
                 stopWatch.stop();
                 time = stopWatch.getLastTaskTimeMillis();
                 statsCmd.close();
