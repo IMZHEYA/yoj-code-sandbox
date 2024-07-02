@@ -28,7 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Docker实现代码沙箱
+ * Docker实现代码沙箱(老版)
  */
 public class JavaDockerCodeSandboxOld implements CodeSandbox {
 

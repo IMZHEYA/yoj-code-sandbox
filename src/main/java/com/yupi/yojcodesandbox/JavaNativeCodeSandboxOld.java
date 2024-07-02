@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * java原生代码沙箱
+ * java原生代码沙箱（老版）
  */
 public class JavaNativeCodeSandboxOld implements CodeSandbox {
 

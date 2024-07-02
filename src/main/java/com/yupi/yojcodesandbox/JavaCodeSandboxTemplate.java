@@ -21,7 +21,7 @@ import java.util.UUID;
  * 模版方法抽象类
  */
 @Slf4j
-public abstract  class JavaCodeSandboxTemplate implements CodeSandbox {
+public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
 
     private static final String GLOBAL_CODE_DIR_NAME = "tempCode";
 
@@ -142,6 +142,11 @@ public abstract  class JavaCodeSandboxTemplate implements CodeSandbox {
         return executecodeResponse;
     }
 
+    /**
+     * 5.文件清理
+     * @param userCodeFile
+     * @return
+     */
     public boolean deleteFile(File userCodeFile){
         String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
         if(userCodeFile.getParentFile() != null){
