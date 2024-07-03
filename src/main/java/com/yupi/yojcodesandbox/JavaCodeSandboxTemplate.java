@@ -80,7 +80,8 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
         String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
         for(String inputArgs:inputList){
-            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=MySecurityManager Main %s", userCodeParentPath, SECURITY_MANAGER_CLASS_NAME, inputArgs);
+//            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=MySecurityManager Main %s", userCodeParentPath, SECURITY_MANAGER_CLASS_NAME, inputArgs);
+            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s Main %s", userCodeParentPath,SECURITY_MANAGER_CLASS_NAME, inputArgs);
             try {
                 //执行命令
                 Process process = Runtime.getRuntime().exec(runCmd);

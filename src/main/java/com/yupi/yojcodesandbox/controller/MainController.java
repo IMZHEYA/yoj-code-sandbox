@@ -25,6 +25,8 @@ public class MainController {
      * @param executecodeCodeRequest
      * @return
      */
+    //http://localhost:8090/health
+    //http://localhost:8090/executeCode
     @PostMapping("/executeCode")
     public ExecutecodeResponse executeCode(@RequestBody ExecutecodeCodeRequest executecodeCodeRequest) {
         if(executecodeCodeRequest == null){

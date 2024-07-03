@@ -1,10 +1,14 @@
 package com.yupi.yojcodesandbox.utils;
 
 import com.yupi.yojcodesandbox.model.ExecuteMessage;
+import io.netty.util.internal.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StopWatch;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 进程工具类，执行进程并获取输出，并且使用 StringBuilder 拼接控制台输出信息
@@ -25,33 +29,34 @@ public class ProcessUtils {
                 System.out.println(opName + "成功");
                 //分批读取输入流（控制台输出）
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
-                StringBuilder compileOutputStringBuilder = new StringBuilder();
+                List<String> outputList = new ArrayList<>();
                 //逐行读取，控制台输出信息
                 String compileOutputLine;
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutputLine).append("\n");
+                    outputList.add(compileOutputLine);
                 }
-                executeMessage.setMessage(compileOutputStringBuilder.toString());
+                executeMessage.setMessage(StringUtils.join(outputList + "\n"));
             } else {
                 System.out.println(opName + "失败" + exitValue);
                 //分批读取正常输出流：有的程序员会在正常输出里写一些错误日志之类的
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
-                StringBuilder compileOutputStringBuilder = new StringBuilder();
+                List<String> outputList = new ArrayList<>();
                 //逐行读取，控制台输出信息
                 String compileOutputLine;
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
-                    compileOutputStringBuilder.append(compileOutputLine).append("\n");
+                    outputList.add(compileOutputLine);
                 }
-                System.out.println(compileOutputStringBuilder);
+                executeMessage.setMessage(StringUtils.join(outputList + "\n"));
                 //分批读取错误输出：
                 BufferedReader errorbufferedReader = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
                 StringBuilder errorCompileOutputStringBuilder = new StringBuilder();
+                List<String> errorOutputList = new ArrayList<>();
                 //逐行读取，控制台输出信息
                 String errorcompileOutputLine;
                 while ((errorcompileOutputLine = errorbufferedReader.readLine()) != null) {
-                    errorCompileOutputStringBuilder.append(errorcompileOutputLine).append("\n");
+                    errorOutputList.add(errorcompileOutputLine);
                 }
-                executeMessage.setErrorMessage(errorCompileOutputStringBuilder.toString());
+                executeMessage.setErrorMessage(StringUtils.join(errorOutputList + "\n"));
                 stopWatch.stop();
                 long lastTaskTimeMillis = stopWatch.getLastTaskTimeMillis();
                 executeMessage.setTime(lastTaskTimeMillis);
