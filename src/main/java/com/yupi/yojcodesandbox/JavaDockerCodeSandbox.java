@@ -15,6 +15,7 @@ import com.yupi.yojcodesandbox.model.ExecutecodeCodeRequest;
 import com.yupi.yojcodesandbox.model.ExecutecodeResponse;
 import com.yupi.yojcodesandbox.model.JudgeInfo;
 import com.yupi.yojcodesandbox.utils.ProcessUtils;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
 import java.io.Closeable;
@@ -30,28 +31,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Docker实现代码沙箱 （模版方法模式 新版）
  */
+@Component
 public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
 
 
     public static final Boolean FIRST_INIT = true;
 
-    public static void main(String[] args) throws InterruptedException {
-        ExecutecodeCodeRequest executecodeCodeRequest = new ExecutecodeCodeRequest();
-        JavaDockerCodeSandboxOld javaNativeCodeSandbox = new JavaDockerCodeSandboxOld();
-        executecodeCodeRequest.setInputList(Arrays.asList("1 2", "3 4"));
-        //ResourceUtil可以读取resources目录下的文件
-        String code = ResourceUtil.readStr("Main.java", StandardCharsets.UTF_8);
-//        String code = ResourceUtil.readStr("testCode/SleepError.java", StandardCharsets.UTF_8);
-//        String code = ResourceUtil.readStr("testCode/MemoryError.java", StandardCharsets.UTF_8);
-//        String code = ResourceUtil.readStr("testCode/ReadFileError.java", StandardCharsets.UTF_8);
-//        String code = ResourceUtil.readStr("testCode/WriteFileError.java", StandardCharsets.UTF_8);
-//        String code = ResourceUtil.readStr("testCode/RunFileError.java", StandardCharsets.UTF_8);
-        executecodeCodeRequest.setCode(code);
-        executecodeCodeRequest.setLanguage("java");
-        ExecutecodeResponse executecodeResponse = javaNativeCodeSandbox.executeCode(executecodeCodeRequest);
-        System.out.println(executecodeResponse);
-
-    }
 
 
     //只重写了执行文件这一步的代码，其他的直接复用父类的方法
