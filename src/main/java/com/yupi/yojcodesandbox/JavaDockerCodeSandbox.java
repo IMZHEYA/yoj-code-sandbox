@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
 
 
-    public static final Boolean FIRST_INIT = true;
+    public static  Boolean FIRST_INIT = true;
 
 
 
@@ -62,6 +62,7 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
                 System.out.println("拉取镜像异常");
                 throw new RuntimeException(e);
             }
+            FIRST_INIT = false;
         }
         //创建容器，直接创建一个有编译文件的容器
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(image);

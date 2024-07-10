@@ -1,5 +1,6 @@
 package com.yupi.yojcodesandbox.controller;
 
+import com.yupi.yojcodesandbox.JavaDockerCodeSandbox;
 import com.yupi.yojcodesandbox.JavaNativeCodeSandbox;
 import com.yupi.yojcodesandbox.model.ExecutecodeCodeRequest;
 import com.yupi.yojcodesandbox.model.ExecutecodeResponse;
@@ -16,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 public class MainController {
     @Resource
     private JavaNativeCodeSandbox javaNativeCodeSandbox;
+    @Resource
+    private JavaDockerCodeSandbox javaDockerCodeSandbox;
     //鉴权请求头
     public static final String AUTH_REQUEST_HEADER = "auth";
     //密钥

@@ -1,7 +1,6 @@
 package com.yupi.yojcodesandbox.utils;
 
 import com.yupi.yojcodesandbox.model.ExecuteMessage;
-import io.netty.util.internal.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StopWatch;
 
@@ -35,7 +34,7 @@ public class ProcessUtils {
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
                     outputList.add(compileOutputLine);
                 }
-                executeMessage.setMessage(StringUtils.join(outputList + "\n"));
+                executeMessage.setMessage(String.join(" ",outputList));
             } else {
                 System.out.println(opName + "失败" + exitValue);
                 //分批读取正常输出流：有的程序员会在正常输出里写一些错误日志之类的
@@ -46,10 +45,9 @@ public class ProcessUtils {
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
                     outputList.add(compileOutputLine);
                 }
-                executeMessage.setMessage(StringUtils.join(outputList + "\n"));
+                executeMessage.setMessage(StringUtils.join("",outputList));
                 //分批读取错误输出：
                 BufferedReader errorbufferedReader = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
-                StringBuilder errorCompileOutputStringBuilder = new StringBuilder();
                 List<String> errorOutputList = new ArrayList<>();
                 //逐行读取，控制台输出信息
                 String errorcompileOutputLine;
@@ -57,10 +55,10 @@ public class ProcessUtils {
                     errorOutputList.add(errorcompileOutputLine);
                 }
                 executeMessage.setErrorMessage(StringUtils.join(errorOutputList + "\n"));
-                stopWatch.stop();
-                long lastTaskTimeMillis = stopWatch.getLastTaskTimeMillis();
-                executeMessage.setTime(lastTaskTimeMillis);
             }
+            stopWatch.stop();
+            long lastTaskTimeMillis = stopWatch.getLastTaskTimeMillis();
+            executeMessage.setTime(lastTaskTimeMillis);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -162,7 +162,6 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
     @Override
     public ExecutecodeResponse executeCode(ExecutecodeCodeRequest excodeCodeRequest) {
         List<String> inputList = excodeCodeRequest.getInputList();
-        inputList = Arrays.asList("1 2","3 4");
         String code = excodeCodeRequest.getCode();
         String language = excodeCodeRequest.getLanguage();
         //1. 把用户的代码保存为文件
