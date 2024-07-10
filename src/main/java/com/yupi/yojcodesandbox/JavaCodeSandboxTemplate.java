@@ -1,6 +1,7 @@
 package com.yupi.yojcodesandbox;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
 import com.yupi.yojcodesandbox.model.ExecuteMessage;
 import com.yupi.yojcodesandbox.model.ExecutecodeCodeRequest;
@@ -115,11 +116,17 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
         ExecutecodeResponse executecodeResponse = new ExecutecodeResponse();
         List<String> outputList = new ArrayList<>();
         Long maxTime = 0L;
+        Long maxMemory = 0L;
+        StringBuilder message = new StringBuilder();
         for(ExecuteMessage executeMessage : executeMessageList){
             //只要有一个程序超时，就判断为超时
             Long time = executeMessage.getTime();
             if(time != null){
                 maxTime = Math.max(time,maxTime);
+            }
+            Long memory = executeMessage.getMemory();
+            if(maxMemory != null){
+                maxMemory = Math.max(memory,maxMemory);
             }
             //有的执行用例执行时出现错误，响应信息直接设为用户提交代码错误的信息，且响应状态设为错误,中断循环
             if(StrUtil.isNotBlank(executeMessage.getErrorMessage())){
@@ -129,6 +136,7 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
             }
             //将输出用例添加到列表
             outputList.add(executeMessage.getMessage());
+            message.append(executeMessage.getMessage());
         }
         executecodeResponse.setOutputList(outputList);
         //每条都正常输出了，正常运行完成,状态设置为1
@@ -136,9 +144,9 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
             executecodeResponse.setStatus(1);
         }
         JudgeInfo judgeInfo = new JudgeInfo();
-//        judgeInfo.setMessage();   judgeInfo 的信息在判题过程中设置
+        judgeInfo.setMessage(message.toString());   //judgeInfo 的信息在判题过程中设置
         judgeInfo.setTime(maxTime);
-//        judgeInfo.setMemory();
+        judgeInfo.setMemory(maxMemory);
         executecodeResponse.setJudgeInfo(judgeInfo);
         return executecodeResponse;
     }

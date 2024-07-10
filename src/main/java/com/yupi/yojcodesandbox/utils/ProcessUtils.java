@@ -2,6 +2,7 @@ package com.yupi.yojcodesandbox.utils;
 
 import com.yupi.yojcodesandbox.model.ExecuteMessage;
 import org.apache.commons.lang3.StringUtils;
+import org.omg.SendingContext.RunTime;
 import org.springframework.util.StopWatch;
 
 import java.io.BufferedReader;
@@ -58,11 +59,26 @@ public class ProcessUtils {
             }
             stopWatch.stop();
             long lastTaskTimeMillis = stopWatch.getLastTaskTimeMillis();
+            long finalMemory = getUsedMemory();
+            // 计算内存使用量，单位字节，转换成kb需要除以1024
             executeMessage.setTime(lastTaskTimeMillis);
+            executeMessage.setMemory(finalMemory / 1024);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return executeMessage;
+    }
+
+    /**
+     * 获取当前已使用的内存量
+     * 单位是byte
+     *
+     * @return
+     */
+    public static long getUsedMemory() {
+        Runtime runtime = Runtime.getRuntime();
+        return runtime.totalMemory() - runtime.freeMemory();
     }
 
 }
